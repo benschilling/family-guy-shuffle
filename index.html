@@ -1,0 +1,149 @@
+<script src="script.js"></script>
+<link rel="stylesheet" type="text/css" href="stylesheet.css"></script>
+<head>
+  Family Guy Shuffle!
+</head>
+<div class="brian">
+  <img src="images/brian.png" alt=""/>
+</div>
+<div class="stewie">
+  <img src="images/stewie.png" alt=""/>
+</div>
+
+<div class="scene">
+  <div class="carousel">
+    <div class="carousel__cell">
+      <img src="images/v1.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/v2.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/v3.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/v4.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/v5.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/v6.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/v7.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/v8.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/v9.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/v10.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/v11.png" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/v12.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/s12.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/s13.jpeg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/s14.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/s15.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/s16.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/s17.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/s18.jpg" alt="" />
+    </div>
+  </div>
+</div>
+<div class="carousel-options">
+  <p>
+      <input class="cells-range" type="hidden" value="19" />
+  </p>
+  <p>
+    <button class="random-button" onclick="setTimeout(showEpisode, 4500)">Go!</button>
+  </p>
+</div>
+<div class="episode-container">
+  <div class="episode" id="episode">Season 12: Episode 18</div>
+</div>
+
+
+<script type="text/javascript">
+  var carousel = document.querySelector('.carousel');
+  var cells = carousel.querySelectorAll('.carousel__cell');
+  var cellCount = 12; // cellCount set from cells-range input value
+  var selectedIndex = 0;
+  var cellWidth = carousel.offsetWidth;
+  var cellHeight = carousel.offsetHeight;
+  var isHorizontal = true;
+  var radius, theta;
+
+  document.getElementById("episode").style.display = "none";
+
+  function rotateCarousel() {
+  var angle = theta * selectedIndex * -57;
+  carousel.style.transform = 'translateZ(' + -radius + 'px) ' + 
+      rotateFn + '(' + angle + 'deg)';
+  }
+
+  var randomButton = document.querySelector('.random-button');
+  randomButton.addEventListener( 'click', function() {
+  selectedIndex++;
+  rotateCarousel();
+  });
+
+  var cellsRange = document.querySelector('.cells-range');
+  cellsRange.addEventListener( 'change', changeCarousel );
+  cellsRange.addEventListener( 'input', changeCarousel );
+
+  function changeCarousel() {
+  cellCount = cellsRange.value;
+  theta = 360 / cellCount;
+  var cellSize = isHorizontal ? cellWidth : cellHeight;
+  radius = Math.round( ( cellSize / 2) / Math.tan( Math.PI / cellCount ) );
+  for ( var i=0; i < cells.length; i++ ) {
+      var cell = cells[i];
+      if ( i < cellCount ) {
+      cell.style.opacity = 1;
+      var cellAngle = theta * i;
+      cell.style.transform = rotateFn + '(' + cellAngle + 'deg) translateZ(' + radius + 'px)';
+      } else {
+      cell.style.opacity = 0;
+      cell.style.transform = 'none';
+      }
+  }
+
+  rotateCarousel();
+  }
+
+  function onOrientationChange() {
+  var checkedRadio = document.querySelector('input[name="orientation"]:checked');
+  isHorizontal = "horizontal" == 'horizontal';
+  rotateFn = isHorizontal ? 'rotateY' : 'rotateX';
+  changeCarousel();
+  }
+
+  function showEpisode() {
+    var x = document.getElementById("episode");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    }
+  }
+  onOrientationChange();
+</script>

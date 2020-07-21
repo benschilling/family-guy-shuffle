@@ -1,0 +1,121 @@
+* {
+   box-sizing: border-box;
+   background-color: rgb(192, 233, 247); 
+}
+
+@font-face {
+    font-family: familyGuyFont;
+    src: url(Famig___.TTF);
+  }
+
+body {
+  font-family: familyGuyFont;
+  padding-top: 20px;
+  text-align: center;
+  font-size: 50px;
+  color: #019AD3;
+}
+
+.scene {
+  /* border: 1px solid #CCC; */
+  margin: 20px 0;
+  position: relative;
+  width: 210px;
+  height: 140px;
+  margin-top: 40 auto;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 70;
+  perspective: 1000px;
+  z-index: 1;
+}
+
+.carousel {
+  width: 100%;
+  height: 100%;
+  
+  position: absolute;
+  transform: translateZ(-288px);
+  transform-style: preserve-3d;
+  transition: transform 4s;
+}
+
+.carousel__cell {
+  position: absolute;
+  width: 205px;
+  height: 278px;
+  line-height: 116px;
+  font-size: 80px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  transition: transform 1s, opacity 1s;
+}
+
+.carousel-options {
+  top: 80;
+  text-align: center;
+  position: relative;
+  color: transparent;
+  background: hsla(0, 0%, 100%, 0.8);
+}
+.random-button {
+    border: none;
+    color: white;
+    border-radius: 10px;
+    height: 70px;
+    width: 140px;
+    font-size: 32px;
+    margin: 4px 2px;
+    background-color: red;
+    color: white;
+    font-family: familyGuyFont;
+}
+.random-button:active{
+  background-color: rgb(170, 20, 20);
+}
+.random-button:focus{
+  outline: none;
+}
+.random-button:hover {
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+
+.episode-container {
+  top: 50px;
+  width: 50%;
+  position: relative; 
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.episode {
+  border-radius: 25px;
+  background-color: aliceblue;
+  font-family: 'Courier New', Courier, monospace;
+  text-align: center;
+  font-size: 30px;
+  font-weight: 600;
+}
+
+.brian {
+    position: absolute;
+    width: 205px;
+    height: 278px;
+    right: 20px;
+    bottom: 10px;
+}
+
+.stewie {
+  position: absolute;
+  width: 205px;
+  height: 278px;
+  left: 20px;
+  bottom: 10px;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+  }
+
