@@ -1,7 +1,9 @@
-<script src="script.js"></script>
 <link rel="stylesheet" type="text/css" href="stylesheet.css"></script>
 <head>
-  Family Guy Shuffle!
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <div class="title">
+    Family Guy Shuffle!
+  </div>
 </head>
 <div class="brian">
   <img src="images/brian.png" alt=""/>
@@ -25,7 +27,13 @@
       <img src="images/v4.jpg" alt="" />
     </div>
     <div class="carousel__cell">
+      <img src="images/untold.png" alt="" />
+    </div>
+    <div class="carousel__cell">
       <img src="images/v5.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/blueharvest.jpg" alt="" />
     </div>
     <div class="carousel__cell">
       <img src="images/v6.jpg" alt="" />
@@ -37,7 +45,13 @@
       <img src="images/v8.jpg" alt="" />
     </div>
     <div class="carousel__cell">
+      <img src="images/something.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
       <img src="images/v9.jpg" alt="" />
+    </div>
+    <div class="carousel__cell">
+      <img src="images/itsatrap.png" alt="" />
     </div>
     <div class="carousel__cell">
       <img src="images/v10.jpg" alt="" />
@@ -71,16 +85,22 @@
     </div>
   </div>
 </div>
-<div class="carousel-options">
+<div class="carousel-options" id="carousel-options">
   <p>
-      <input class="cells-range" type="hidden" value="19" />
+      <input class="cells-range" type="hidden" value="23" />
   </p>
   <p>
-    <button class="random-button" onclick="setTimeout(showEpisode, 4500)">Go!</button>
+    <button class="random-button" id="random-button" onclick="setTimeout(showEpisode, 4200)">Go!</button>
   </p>
 </div>
-<div class="episode-container">
-  <div class="episode" id="episode">Season 12: Episode 18</div>
+<div class="episode-container" id="episode-container">
+  <div class="episode" id="episode"></div>
+  <div class="episode" id="title"></div>
+  <div class="episode" id="description"></div>
+  <div class="episode" id="air-date"></div>
+</div>
+<div class="reset-container">
+  <button class="reset-button" id="reset-button">RESET</button>
 </div>
 
 
@@ -93,19 +113,44 @@
   var cellHeight = carousel.offsetHeight;
   var isHorizontal = true;
   var radius, theta;
-
-  document.getElementById("episode").style.display = "none";
+  var episodeNumber;
+  var seasonResult;
+  var episodeResult;
+  var episodeName;
+  var airDate;
+  var details;
+  var volumeResult = 0;
+  var episodeDisplay = document.getElementById("episode");
+  var titleDisplay = document.getElementById("title");
+  var descriptionDisplay = document.getElementById("description");
+  var airdateDisplay = document.getElementById("air-date");
+  var resetDisplay = document.getElementById("reset-button");
+  var randomDisplay = document.getElementById("random-button");
+  var episodeContainerDisplay = document.getElementById("episode-container");
 
   function rotateCarousel() {
-  var angle = theta * selectedIndex * -57;
+  var angle = theta * selectedIndex * (-68-volumeResult);
   carousel.style.transform = 'translateZ(' + -radius + 'px) ' + 
       rotateFn + '(' + angle + 'deg)';
+      selectedIndex = 0;
   }
 
-  var randomButton = document.querySelector('.random-button');
+  function getRandom() {
+    episodeNumber = Math.floor((Math.random() * 349) + 1);
+  }
+
+  var randomButton = document.getElementById('random-button');
   randomButton.addEventListener( 'click', function() {
-  selectedIndex++;
-  rotateCarousel();
+    getRandom();
+    selectedIndex++;
+    seasonResult = episodeArray[episodeNumber-1].season;
+    episodeResult = episodeArray[episodeNumber-1].episode;
+    volumeResult = episodeArray[episodeNumber-1].volume;
+    console.log("Season: "+ seasonResult);
+    console.log("Episode: "+ episodeResult);
+    console.log("Volume: " + volumeResult);
+    getDetails();
+    rotateCarousel();
   });
 
   var cellsRange = document.querySelector('.cells-range');
@@ -113,23 +158,23 @@
   cellsRange.addEventListener( 'input', changeCarousel );
 
   function changeCarousel() {
-  cellCount = cellsRange.value;
-  theta = 360 / cellCount;
-  var cellSize = isHorizontal ? cellWidth : cellHeight;
-  radius = Math.round( ( cellSize / 2) / Math.tan( Math.PI / cellCount ) );
-  for ( var i=0; i < cells.length; i++ ) {
-      var cell = cells[i];
-      if ( i < cellCount ) {
-      cell.style.opacity = 1;
-      var cellAngle = theta * i;
-      cell.style.transform = rotateFn + '(' + cellAngle + 'deg) translateZ(' + radius + 'px)';
-      } else {
-      cell.style.opacity = 0;
-      cell.style.transform = 'none';
-      }
-  }
+    cellCount = cellsRange.value;
+    theta = 360 / cellCount;
+    var cellSize = isHorizontal ? cellWidth : cellHeight;
+    radius = Math.round( ( cellSize / 2) / Math.tan( Math.PI / cellCount ) );
+    for ( var i=0; i < cells.length; i++ ) {
+        var cell = cells[i];
+        if ( i < cellCount ) {
+        cell.style.opacity = 1;
+        var cellAngle = theta * i;
+        cell.style.transform = rotateFn + '(' + cellAngle + 'deg) translateZ(' + radius + 'px)';
+        } else {
+        cell.style.opacity = 0;
+        cell.style.transform = 'none';
+        }
+    }
 
-  rotateCarousel();
+    rotateCarousel();
   }
 
   function onOrientationChange() {
@@ -139,11 +184,2150 @@
   changeCarousel();
   }
 
+  function getDetails() {
+    var url = `https://api.themoviedb.org/3/tv/1434/season/${seasonResult}/episode/${episodeResult}?api_key=a2f782d4c2132563a7d35c46df2fc861&language=en-US`;
+    $.get( url, function( data ) {
+      airDate = data.air_date;
+      episodeName = data.name;
+      details = data.overview;
+      console.log( "Data Loaded: " + data.overview );
+      setDetails();
+    });
+  }
+
+  function setDetails() {
+    episodeDisplay.innerHTML = `Season: ${seasonResult}, Episode ${episodeResult} <br><br>`;
+    titleDisplay.innerHTML = `"${String(episodeName)}" <br><br>`;
+    descriptionDisplay.innerHTML = `${details} <br><br>`;
+    airdateDisplay.innerHTML = `${airDate} <br><br>`;
+  }
+
   function showEpisode() {
-    var x = document.getElementById("episode");
-    if (x.style.display === "none") {
-      x.style.display = "block";
+    if (episodeDisplay.style.display === "none") {
+      episodeDisplay.style.display = "block";
+      episodeContainerDisplay.style.display="block";
+      titleDisplay.style.display = "block";
+      descriptionDisplay.style.display = "block";
+      airdateDisplay.style.display = "block";
+      resetDisplay.style.display = "block";
+      randomDisplay.style.display = "none";
     }
   }
+
+  function hideEpisode() {
+    episodeDisplay.style.display = "none";
+    episodeContainerDisplay.style.display = "none";
+    titleDisplay.style.display = "none";
+    descriptionDisplay.style.display = "none";
+    airdateDisplay.style.display = "none";
+    resetDisplay.style.display = "none";
+  }
+
+  var resetButton = document.getElementById("reset-button");
+  resetButton.addEventListener( 'click', function() {
+    hideEpisode();
+    onOrientationChange();
+    document.getElementById("random-button").style.display = "block";
+    document.getElementById("carousel-options").style.display = "block";
+  });
+
+
+  hideEpisode();
   onOrientationChange();
+  let episodeArray = [
+  {
+    "number": 1,
+    "episode": 1,
+    "season": 1,
+    "volume": 1
+  },
+  {
+    "number": 2,
+    "episode": 2,
+    "season": 1,
+    "volume": 1
+  },
+  {
+    "number": 3,
+    "episode": 3,
+    "season": 1,
+    "volume": 1
+  },
+  {
+    "number": 4,
+    "episode": 4,
+    "season": 1,
+    "volume": 1
+  },
+  {
+    "number": 5,
+    "episode": 5,
+    "season": 1,
+    "volume": 1
+  },
+  {
+    "number": 6,
+    "episode": 6,
+    "season": 1,
+    "volume": 1
+  },
+  {
+    "number": 7,
+    "episode": 7,
+    "season": 1,
+    "volume": 1
+  },
+  {
+    "number": 8,
+    "episode": 1,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 9,
+    "episode": 2,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 10,
+    "episode": 3,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 11,
+    "episode": 4,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 12,
+    "episode": 5,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 13,
+    "episode": 6,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 14,
+    "episode": 7,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 15,
+    "episode": 8,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 16,
+    "episode": 9,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 17,
+    "episode": 10,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 18,
+    "episode": 11,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 19,
+    "episode": 12,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 20,
+    "episode": 13,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 21,
+    "episode": 14,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 22,
+    "episode": 15,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 23,
+    "episode": 16,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 24,
+    "episode": 17,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 25,
+    "episode": 18,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 26,
+    "episode": 19,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 27,
+    "episode": 20,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 28,
+    "episode": 21,
+    "season": 2,
+    "volume": 1
+  },
+  {
+    "number": 29,
+    "episode": 1,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 30,
+    "episode": 2,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 31,
+    "episode": 3,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 32,
+    "episode": 4,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 33,
+    "episode": 5,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 34,
+    "episode": 6,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 35,
+    "episode": 7,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 36,
+    "episode": 8,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 37,
+    "episode": 9,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 38,
+    "episode": 10,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 39,
+    "episode": 11,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 40,
+    "episode": 12,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 41,
+    "episode": 13,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 42,
+    "episode": 14,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 43,
+    "episode": 15,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 44,
+    "episode": 16,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 45,
+    "episode": 17,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 46,
+    "episode": 18,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 47,
+    "episode": 19,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 48,
+    "episode": 20,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 49,
+    "episode": 21,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 50,
+    "episode": 22,
+    "season": 3,
+    "volume": 2
+  },
+  {
+    "number": 51,
+    "episode": 1,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 52,
+    "episode": 2,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 53,
+    "episode": 3,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 54,
+    "episode": 4,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 55,
+    "episode": 5,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 56,
+    "episode": 6,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 57,
+    "episode": 7,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 58,
+    "episode": 8,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 59,
+    "episode": 9,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 60,
+    "episode": 10,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 61,
+    "episode": 11,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 62,
+    "episode": 12,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 63,
+    "episode": 13,
+    "season": 4,
+    "volume": 3
+  },
+  {
+    "number": 64,
+    "episode": 14,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 65,
+    "episode": 15,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 66,
+    "episode": 16,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 67,
+    "episode": 17,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 68,
+    "episode": 18,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 69,
+    "episode": 19,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 70,
+    "episode": 20,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 71,
+    "episode": 21,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 72,
+    "episode": 22,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 73,
+    "episode": 23,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 74,
+    "episode": 24,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 75,
+    "episode": 25,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 76,
+    "episode": 26,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 77,
+    "episode": 27,
+    "season": 4,
+    "volume": 4
+  },
+  {
+    "number": 78,
+    "episode": 28,
+    "season": 4,
+    "volume": 5
+  },
+  {
+    "number": 79,
+    "episode": 29,
+    "season": 4,
+    "volume": 5
+  },
+  {
+    "number": 80,
+    "episode": 30,
+    "season": 4,
+    "volume": 5
+  },
+  {
+    "number": 81,
+    "episode": 1,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 82,
+    "episode": 2,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 83,
+    "episode": 3,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 84,
+    "episode": 4,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 85,
+    "episode": 5,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 86,
+    "episode": 6,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 87,
+    "episode": 7,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 88,
+    "episode": 8,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 89,
+    "episode": 9,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 90,
+    "episode": 10,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 91,
+    "episode": 11,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 92,
+    "episode": 12,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 93,
+    "episode": 13,
+    "season": 5,
+    "volume": 6
+  },
+  {
+    "number": 94,
+    "episode": 14,
+    "season": 5,
+    "volume": 8
+  },
+  {
+    "number": 95,
+    "episode": 15,
+    "season": 5,
+    "volume": 8
+  },
+  {
+    "number": 96,
+    "episode": 16,
+    "season": 5,
+    "volume": 8
+  },
+  {
+    "number": 97,
+    "episode": 17,
+    "season": 5,
+    "volume": 8
+  },
+  {
+    "number": 98,
+    "episode": 18,
+    "season": 5,
+    "volume": 8
+  },
+  {
+    "number": 99,
+    "episode": 1,
+    "season": 6,
+    "volume": 7
+  },
+  {
+    "number": 100,
+    "episode": 2,
+    "season": 6,
+    "volume": 8
+  },
+  {
+    "number": 101,
+    "episode": 3,
+    "season": 6,
+    "volume": 8
+  },
+  {
+    "number": 102,
+    "episode": 4,
+    "season": 6,
+    "volume": 8
+  },
+  {
+    "number": 103,
+    "episode": 5,
+    "season": 6,
+    "volume": 8
+  },
+  {
+    "number": 104,
+    "episode": 6,
+    "season": 6,
+    "volume": 8
+  },
+  {
+    "number": 105,
+    "episode": 7,
+    "season": 6,
+    "volume": 8
+  },
+  {
+    "number": 106,
+    "episode": 8,
+    "season": 6,
+    "volume": 8
+  },
+  {
+    "number": 107,
+    "episode": 9,
+    "season": 6,
+    "volume": 9
+  },
+  {
+    "number": 108,
+    "episode": 10,
+    "season": 6,
+    "volume": 9
+  },
+  {
+    "number": 109,
+    "episode": 11,
+    "season": 6,
+    "volume": 9
+  },
+  {
+    "number": 110,
+    "episode": 12,
+    "season": 6,
+    "volume": 9
+  },
+  {
+    "number": 111,
+    "episode": 1,
+    "season": 7,
+    "volume": 9
+  },
+  {
+    "number": 112,
+    "episode": 2,
+    "season": 7,
+    "volume": 9
+  },
+  {
+    "number": 113,
+    "episode": 3,
+    "season": 7,
+    "volume": 9
+  },
+  {
+    "number": 114,
+    "episode": 4,
+    "season": 7,
+    "volume": 9
+  },
+  {
+    "number": 115,
+    "episode": 5,
+    "season": 7,
+    "volume": 9
+  },
+  {
+    "number": 116,
+    "episode": 6,
+    "season": 7,
+    "volume": 9
+  },
+  {
+    "number": 117,
+    "episode": 7,
+    "season": 7,
+    "volume": 9
+  },
+  {
+    "number": 118,
+    "episode": 8,
+    "season": 7,
+    "volume": 9
+  },
+  {
+    "number": 119,
+    "episode": 9,
+    "season": 7,
+    "volume": 9
+  },
+  {
+    "number": 120,
+    "episode": 10,
+    "season": 7,
+    "volume": 10
+  },
+  {
+    "number": 121,
+    "episode": 11,
+    "season": 7,
+    "volume": 10
+  },
+  {
+    "number": 122,
+    "episode": 12,
+    "season": 7,
+    "volume": 10
+  },
+  {
+    "number": 123,
+    "episode": 13,
+    "season": 7,
+    "volume": 10
+  },
+  {
+    "number": 124,
+    "episode": 14,
+    "season": 7,
+    "volume": 10
+  },
+  {
+    "number": 125,
+    "episode": 15,
+    "season": 7,
+    "volume": 10
+  },
+  {
+    "number": 126,
+    "episode": 16,
+    "season": 7,
+    "volume": 10
+  },
+  {
+    "number": 127,
+    "episode": 1,
+    "season": 8,
+    "volume": 10
+  },
+  {
+    "number": 128,
+    "episode": 2,
+    "season": 8,
+    "volume": 10
+  },
+  {
+    "number": 129,
+    "episode": 3,
+    "season": 8,
+    "volume": 10
+  },
+  {
+    "number": 130,
+    "episode": 4,
+    "season": 8,
+    "volume": 10
+  },
+  {
+    "number": 131,
+    "episode": 5,
+    "season": 8,
+    "volume": 10
+  },
+  {
+    "number": 132,
+    "episode": 6,
+    "season": 8,
+    "volume": 10
+  },
+  {
+    "number": 133,
+    "episode": 7,
+    "season": 8,
+    "volume": 10
+  },
+  {
+    "number": 134,
+    "episode": 8,
+    "season": 8,
+    "volume": 10
+  },
+  {
+    "number": 135,
+    "episode": 9,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 136,
+    "episode": 10,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 137,
+    "episode": 11,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 138,
+    "episode": 12,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 139,
+    "episode": 13,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 140,
+    "episode": 14,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 141,
+    "episode": 15,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 142,
+    "episode": 16,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 143,
+    "episode": 17,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 144,
+    "episode": 18,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 145,
+    "episode": 19,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 146,
+    "episode": 20,
+    "season": 8,
+    "volume": 12
+  },
+  {
+    "number": 147,
+    "episode": 21,
+    "season": 8,
+    "volume": 11
+  },
+  {
+    "number": 148,
+    "episode": 1,
+    "season": 9,
+    "volume": 11
+  },
+  {
+    "number": 149,
+    "episode": 2,
+    "season": 9,
+    "volume": 11
+  },
+  {
+    "number": 150,
+    "episode": 3,
+    "season": 9,
+    "volume": 11
+  },
+  {
+    "number": 151,
+    "episode": 4,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 152,
+    "episode": 5,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 153,
+    "episode": 6,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 154,
+    "episode": 7,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 155,
+    "episode": 8,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 156,
+    "episode": 9,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 157,
+    "episode": 10,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 158,
+    "episode": 11,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 159,
+    "episode": 12,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 160,
+    "episode": 13,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 161,
+    "episode": 14,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 162,
+    "episode": 15,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 163,
+    "episode": 16,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 164,
+    "episode": 17,
+    "season": 9,
+    "volume": 13
+  },
+  {
+    "number": 165,
+    "episode": 18,
+    "season": 9,
+    "volume": 14
+  },
+  {
+    "number": 166,
+    "episode": 1,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 167,
+    "episode": 2,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 168,
+    "episode": 3,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 169,
+    "episode": 4,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 170,
+    "episode": 5,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 171,
+    "episode": 6,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 172,
+    "episode": 7,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 173,
+    "episode": 8,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 174,
+    "episode": 9,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 175,
+    "episode": 10,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 176,
+    "episode": 11,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 177,
+    "episode": 12,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 178,
+    "episode": 13,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 179,
+    "episode": 14,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 180,
+    "episode": 15,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 181,
+    "episode": 16,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 182,
+    "episode": 17,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 183,
+    "episode": 18,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 184,
+    "episode": 19,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 185,
+    "episode": 20,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 186,
+    "episode": 21,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 187,
+    "episode": 22,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 188,
+    "episode": 23,
+    "season": 10,
+    "volume": 15
+  },
+  {
+    "number": 189,
+    "episode": 1,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 190,
+    "episode": 2,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 191,
+    "episode": 3,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 192,
+    "episode": 4,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 193,
+    "episode": 5,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 194,
+    "episode": 6,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 195,
+    "episode": 7,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 196,
+    "episode": 8,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 197,
+    "episode": 9,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 198,
+    "episode": 10,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 199,
+    "episode": 11,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 200,
+    "episode": 12,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 201,
+    "episode": 13,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 202,
+    "episode": 14,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 203,
+    "episode": 15,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 204,
+    "episode": 16,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 205,
+    "episode": 17,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 206,
+    "episode": 18,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 207,
+    "episode": 19,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 208,
+    "episode": 20,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 209,
+    "episode": 21,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 210,
+    "episode": 22,
+    "season": 11,
+    "volume": 16
+  },
+  {
+    "number": 211,
+    "episode": 1,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 212,
+    "episode": 2,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 213,
+    "episode": 3,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 214,
+    "episode": 4,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 215,
+    "episode": 5,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 216,
+    "episode": 6,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 217,
+    "episode": 7,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 218,
+    "episode": 8,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 219,
+    "episode": 9,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 220,
+    "episode": 10,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 221,
+    "episode": 11,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 222,
+    "episode": 12,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 223,
+    "episode": 13,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 224,
+    "episode": 14,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 225,
+    "episode": 15,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 226,
+    "episode": 16,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 227,
+    "episode": 17,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 228,
+    "episode": 18,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 229,
+    "episode": 19,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 230,
+    "episode": 20,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 231,
+    "episode": 21,
+    "season": 12,
+    "volume": 17
+  },
+  {
+    "number": 232,
+    "episode": 1,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 233,
+    "episode": 2,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 234,
+    "episode": 3,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 235,
+    "episode": 4,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 236,
+    "episode": 5,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 237,
+    "episode": 6,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 238,
+    "episode": 7,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 239,
+    "episode": 8,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 240,
+    "episode": 9,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 241,
+    "episode": 10,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 242,
+    "episode": 11,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 243,
+    "episode": 12,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 244,
+    "episode": 13,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 245,
+    "episode": 14,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 246,
+    "episode": 15,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 247,
+    "episode": 16,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 248,
+    "episode": 17,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 249,
+    "episode": 18,
+    "season": 13,
+    "volume": 18
+  },
+  {
+    "number": 250,
+    "episode": 1,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 251,
+    "episode": 2,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 252,
+    "episode": 3,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 253,
+    "episode": 4,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 254,
+    "episode": 5,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 255,
+    "episode": 6,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 256,
+    "episode": 7,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 257,
+    "episode": 8,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 258,
+    "episode": 9,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 259,
+    "episode": 10,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 260,
+    "episode": 11,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 261,
+    "episode": 12,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 262,
+    "episode": 13,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 263,
+    "episode": 14,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 264,
+    "episode": 15,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 265,
+    "episode": 16,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 266,
+    "episode": 17,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 267,
+    "episode": 18,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 268,
+    "episode": 19,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 269,
+    "episode": 20,
+    "season": 14,
+    "volume": 19
+  },
+  {
+    "number": 270,
+    "episode": 1,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 271,
+    "episode": 2,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 272,
+    "episode": 3,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 273,
+    "episode": 4,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 274,
+    "episode": 5,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 275,
+    "episode": 6,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 276,
+    "episode": 7,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 277,
+    "episode": 8,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 278,
+    "episode": 9,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 279,
+    "episode": 10,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 280,
+    "episode": 11,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 281,
+    "episode": 12,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 282,
+    "episode": 13,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 283,
+    "episode": 14,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 284,
+    "episode": 15,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 285,
+    "episode": 16,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 286,
+    "episode": 17,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 287,
+    "episode": 18,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 288,
+    "episode": 19,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 289,
+    "episode": 20,
+    "season": 15,
+    "volume": 20
+  },
+  {
+    "number": 290,
+    "episode": 1,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 291,
+    "episode": 2,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 292,
+    "episode": 3,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 293,
+    "episode": 4,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 294,
+    "episode": 5,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 295,
+    "episode": 6,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 296,
+    "episode": 7,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 297,
+    "episode": 8,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 298,
+    "episode": 9,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 299,
+    "episode": 10,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 300,
+    "episode": 11,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 301,
+    "episode": 12,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 302,
+    "episode": 13,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 303,
+    "episode": 14,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 304,
+    "episode": 15,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 305,
+    "episode": 16,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 306,
+    "episode": 17,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 307,
+    "episode": 18,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 308,
+    "episode": 19,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 309,
+    "episode": 20,
+    "season": 16,
+    "volume": 21
+  },
+  {
+    "number": 310,
+    "episode": 1,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 311,
+    "episode": 2,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 312,
+    "episode": 3,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 313,
+    "episode": 4,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 314,
+    "episode": 5,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 315,
+    "episode": 6,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 316,
+    "episode": 7,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 317,
+    "episode": 8,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 318,
+    "episode": 9,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 319,
+    "episode": 10,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 320,
+    "episode": 11,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 321,
+    "episode": 12,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 322,
+    "episode": 13,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 323,
+    "episode": 14,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 324,
+    "episode": 15,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 325,
+    "episode": 16,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 326,
+    "episode": 17,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 327,
+    "episode": 18,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 328,
+    "episode": 19,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 329,
+    "episode": 20,
+    "season": 17,
+    "volume": 22
+  },
+  {
+    "number": 330,
+    "episode": 1,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 331,
+    "episode": 2,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 332,
+    "episode": 3,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 333,
+    "episode": 4,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 334,
+    "episode": 5,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 335,
+    "episode": 6,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 336,
+    "episode": 7,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 337,
+    "episode": 8,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 338,
+    "episode": 9,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 339,
+    "episode": 10,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 340,
+    "episode": 11,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 341,
+    "episode": 12,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 342,
+    "episode": 13,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 343,
+    "episode": 14,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 344,
+    "episode": 15,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 345,
+    "episode": 16,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 346,
+    "episode": 17,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 347,
+    "episode": 18,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 348,
+    "episode": 19,
+    "season": 18,
+    "volume": 23
+  },
+  {
+    "number": 349,
+    "episode": 20,
+    "season": 18,
+    "volume": 23
+  }
+]
 </script>

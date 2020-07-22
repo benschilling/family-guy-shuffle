@@ -16,12 +16,16 @@ body {
   color: #019AD3;
 }
 
+.title {
+  height: 80;
+}
+
 .scene {
   /* border: 1px solid #CCC; */
   margin: 20px 0;
   position: relative;
   width: 210px;
-  height: 140px;
+  height: 275px;
   margin-top: 40 auto;
   margin-left: auto;
   margin-right: auto;
@@ -53,7 +57,6 @@ body {
 }
 
 .carousel-options {
-  top: 80;
   text-align: center;
   position: relative;
   color: transparent;
@@ -62,14 +65,19 @@ body {
 .random-button {
     border: none;
     color: white;
-    border-radius: 10px;
-    height: 70px;
-    width: 140px;
-    font-size: 32px;
+    border-radius: 40px;
+    height: 210px;
+    width: 350px;
+    font-size: 85px;
     margin: 4px 2px;
     background-color: red;
     color: white;
     font-family: familyGuyFont;
+    position: absolute;
+    top: 100;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
 .random-button:active{
   background-color: rgb(170, 20, 20);
@@ -82,20 +90,60 @@ body {
 }
 
 .episode-container {
-  top: 50px;
-  width: 50%;
-  position: relative; 
-  left: 50%;
-  transform: translateX(-50%);
+  padding: 10px;
+  background-color: aliceblue;
+  position: relative;
+  width: 750px;
+  margin: 0 auto;
+  border-radius: 85px;
+  animation: fadeIn ease 5s;
+  -webkit-animation: fadeIn ease 5s;
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
 }
 
 .episode {
-  border-radius: 25px;
-  background-color: aliceblue;
-  font-family: 'Courier New', Courier, monospace;
+  border-radius:20;
+  background: transparent;
+  font-family: Arial, Helvetica, sans-serif;
   text-align: center;
-  font-size: 30px;
+  font-size: 20px;
   font-weight: 600;
+  animation: fadeIn ease 5s;
+  -webkit-animation: fadeIn ease 5s;
+}
+
+.reset-container{
+  position: relative;
+  top: 20;
+  width: 140px;
+  margin: 0 auto;
+  color: transparent;
+  background-color: transparent;
+}
+
+.reset-button{
+  animation: fadeIn ease 5s;
+  -webkit-animation: fadeIn ease 5s;
+  border: none;
+  color: white;
+  border-radius: 10px;
+  height: 70px;
+  width: 140px;
+  font-size: 32px;
+  background-color: red;
+  font-family: familyGuyFont;
+  margin: 0;
+  position: relative;
+}
+
+.reset-button:active{
+  background-color: rgb(170, 20, 20);
+}
+.reset-button:focus{
+  outline: none;
+}
+.reset-button:hover {
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
 }
 
 .brian {
@@ -104,6 +152,7 @@ body {
     height: 278px;
     right: 20px;
     bottom: 10px;
+    z-index: 1;
 }
 
 .stewie {
@@ -112,6 +161,7 @@ body {
   height: 278px;
   left: 20px;
   bottom: 10px;
+  z-index: 1;
 }
 
 img {
@@ -119,3 +169,28 @@ img {
     height: 100%;
   }
 
+
+  @keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+    }
+    
+    @-moz-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+    }
+    
+    @-webkit-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+    }
+    
+    @-o-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+    }
+    
+    @-ms-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+    }
